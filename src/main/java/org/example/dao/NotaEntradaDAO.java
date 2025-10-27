@@ -20,7 +20,7 @@ public class NotaEntradaDAO {
         try (Connection conn = Conexao.conectar();
              PreparedStatement ps = conn.prepareStatement(sql)){
 
-            ps.setInt(1, notaEntrada.getFornecedor().getId());
+            ps.setInt(1, notaEntrada.getIdFornecedor());
             ps.executeUpdate();
         }
     }
