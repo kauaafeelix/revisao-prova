@@ -31,7 +31,7 @@ public class NotaEntrada {
         this.id = id;
     }
 
-    public int getFornecedor() {
+    public int getIdFornecedor() {
         return idFornecedor;
     }
 
