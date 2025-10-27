@@ -10,6 +10,7 @@ import org.example.model.NotaEntrada;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
@@ -163,8 +164,51 @@ public class Main {
                 }else{
                     var notaEntrada = new NotaEntrada(idFornecedor);
                     var notaEntradaDAO = new NotaEntradaDAO();
-                    notaEntradaDAO.cadastrarNotaEntrada(notaEntrada);
+                    int idNotaEntrada = notaEntradaDAO.cadastrarNotaEntrada(notaEntrada);
                     System.out.println("[OK] Nota de entrada registrada com sucesso para o fornecedor ID: " + idFornecedor);
+
+                    if (idNotaEntrada == 0){
+                        System.err.println("\n[ERRO] Falha ao registrar nota de entrada.");
+                    } else {
+                        var materialDAO = new MaterialDAO();
+                        List<Material>materiais = materialDAO.listarMateriais();
+                        if (materiais.isEmpty()){
+                            System.err.println("\n[ERRO] Nenhum material cadastrado. Cadastre um material antes de associar à nota de entrada.");
+                        } else {
+                            List<Integer>idsMateriais = new ArrayList<>();
+                            for (Material m : materiais){
+                                System.out.println("\nID: " + m.getId() + "\n | Nome: " + m.getNome() + "\n | Unidade: " + m.getUnidade() + "\n | Estoque: " + m.getEstoque() + "\n");
+                                idsMateriais.add(m.getId());
+                            }
+                            var estoque = new HashMap<Integer, Double>();
+                            while (true) {
+                                System.out.println("Digite o ID do Material a ser associado à nota de entrada: ");
+                                int idMaterial = scNum.nextInt();
+                                if(!idsMateriais.contains(idMaterial)){
+                                    System.err.println("\n[ERRO] Material com ID " + idMaterial + " não encontrado.");
+                                    continue;
+                                }else {
+                                    System.out.println("Digite a quantidade do Material a ser associada à nota de entrada: ");
+                                    double quantidade = scNum.nextDouble();
+                                    if (quantidade <= 0 ){
+                                        System.out.println("\n[ERRO] Quantidade deve ser maior que zero.");
+                                        continue;
+                                    }else{
+                                        estoque.put(idMaterial, quantidade);
+                                    }
+                                    System.out.println("Deseja associar outro material? (S/N): ");
+                                    String resposta = scStr.nextLine();
+                                    if (resposta.equalsIgnoreCase("N")) {
+                                        break;
+                                    }else {
+                                        continue;
+                                    }
+                                }
+
+                            }
+                            notaEntradaDAO.associarMateriais(estoque, idNotaEntrada);
+                        }
+                    }
                 }
             }
         } catch (SQLException e) {
